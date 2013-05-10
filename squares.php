@@ -1,4 +1,7 @@
 <?php
+
+require __DIR__ . '/vendor/mexitek/phpcolors/src/color.php';
+
 /*
 Brian Suda
 brian@suda.co.uk
@@ -20,7 +23,7 @@ xmlns="http://www.w3.org/2000/svg">';
 
 
 // Path to your JPG image file
-$im = imagecreatefromjpeg("example.jpg");
+$im = imagecreatefromjpeg($argv[1]);
 $x = imagesx($im);
 $y = imagesy($im);
 
@@ -38,7 +41,7 @@ for($i=0;$i<$x;$i++){
 
 	$color_counter[$k['name']]++;
 
-	$hex = str_pad(dechex($k['red']),2,'0',STR_PAD_LEFT).str_pad(dechex($k['green']),2,'0',STR_PAD_LEFT).str_pad(dechex($k['blue']),2,'0',STR_PAD_LEFT);
+	$hex = toHex($k['red'], $k['green'], $k['blue']);
 	
 	// output it backwards
 	echo '<rect x="'.(($x*$stepper)-($i*$stepper)).'" y="'.($j*$stepper).'" width="'.$rad.'" height="'.$rad.'" fill="#'.$hex.'" />';
@@ -64,6 +67,7 @@ function closestColor($rgb){
 
 	// Load the color array
 	include('hama_colors.php');
+	
 	foreach($colors as $c){
 		$tSmall = colorDistance($r,$g,$b,$c['red'],$c['green'],$c['blue']);
 
@@ -75,17 +79,24 @@ function closestColor($rgb){
 
 			$smallest = $tSmall;
 		}
-		
 	}
-	
 	
 	return $new_color;
 }
-function colorDistance($r,$g,$b,$target_r,$target_g,$target_b){
-	$nR = abs($r-$target_r);
-	$nG = abs($g-$target_g);
-	$nB = abs($b-$target_b);
-	
-	return $nR+$nG+$nB;
+
+function toHex($r, $g, $b) {
+	return str_pad(dechex($r),2,'0',STR_PAD_LEFT).str_pad(dechex($g),2,'0',STR_PAD_LEFT).str_pad(dechex($b),2,'0',STR_PAD_LEFT);
 }
-?>
+
+function colorDistance($r,$g,$b,$target_r,$target_g,$target_b){
+	/**$to = phpColors\Color::hexToHsl(toHex($r, $g, $b));
+	$from = phpColors\Color::hexToHsl(toHex($target_r, $target_g, $target_b));
+	
+	$hDiff = abs($to['H'] - $from['H']);
+	$sDiff = abs($to['S'] - $from['S']);
+	$lDiff = abs($to['L'] - $from['L']);
+	
+	return ($hDiff + $sDiff + $lDiff) / 3;*/
+	
+	return sqrt(pow($r - $target_r, 2) + pow($g - $target_g, 2) + pow($b - $target_b, 2));
+}
